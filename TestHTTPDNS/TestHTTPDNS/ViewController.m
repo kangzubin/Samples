@@ -46,6 +46,10 @@
     // 采用 HTTPDNS 替换后，此时为：https://123.206.23.22/test/httpdns/
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+    // 由于请求的 url 中的域名已经被替换为 IP 了，
+    // 这里需要手动设置请求 Host 字段为相应的域名，便于服务端解析，
+    // 参见：https://help.aliyun.com/knowledge_detail/58683.html?spm=a2c4g.11186631.2.20.EhRKt7
+    [request setValue:self.testHost forHTTPHeaderField:@"Host"];
     NSURLSessionDataTask *dataTask = [self.session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         if (!error) {
             NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
@@ -59,6 +63,7 @@
 
 // 根据域名向 HTTPDNS 服务器请求其对应的服务器 IP 地址，
 // 这里采用腾讯云提供的免费 HTTPDNS 服务作为测试，详见：https://cloud.tencent.com/document/product/379/3524
+// 一般这些云服务商都会提供封装好的 SDK 供我们使用。
 - (void)getDomainNameIP {
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://119.29.29.29/d?dn=%@", self.testHost]];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
